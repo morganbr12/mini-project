@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class Business {
   final String name;
@@ -21,14 +23,22 @@ class BusinessProvider extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
-    await Future.delayed(const Duration(seconds: 1));
     try {
-      // Will be replaced with Dio/networking
-      _businesses = [
-        Business(name: 'Glow & Go Salon', location: 'Atlanta', contact: '+1 404 123 4567'),
-        Business(name: 'Fresh Cuts Barbershop', location: 'Lagos', contact: '+234 802 555 1212'),
-        Business(name: 'Chef Ama Private Kitchen', location: 'Accra', contact: '+233 24 888 9999'),
-      ];
+      final dio = Dio();
+      final jsonStr = await rootBundle.loadString('assets/businesses.json');
+      final response = await dio.get(
+        '',
+        options: Options(responseType: ResponseType.json),
+        data: jsonStr,
+      );
+      final List<dynamic> data = response.data ?? [];
+      _businesses = data.map((item) {
+        return Business(
+          name: item['biz_name'] ?? '',
+          location: item['bss_location'] ?? '',
+          contact: item['contct_no'] ?? '',
+        );
+      }).toList();
     } catch (e) {
       _error = 'Failed to load businesses';
     }
