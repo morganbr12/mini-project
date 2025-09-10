@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'local_persistence.dart';
 
 class Business {
   final String name;
@@ -24,6 +25,19 @@ class BusinessProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
+      final cached = await LocalPersistence.loadBusinesses();
+      if (cached != null) {
+        _businesses = cached.map((item) {
+          return Business(
+            name: item['biz_name'] ?? '',
+            location: item['bss_location'] ?? '',
+            contact: item['contct_no'] ?? '',
+          );
+        }).toList();
+        _loading = false;
+        notifyListeners();
+        return;
+      }
       final dio = Dio();
       final jsonStr = await rootBundle.loadString('assets/businesses.json');
       final response = await dio.get(
@@ -39,6 +53,7 @@ class BusinessProvider extends ChangeNotifier {
           contact: item['contct_no'] ?? '',
         );
       }).toList();
+      await LocalPersistence.saveBusinesses(List<Map<String, dynamic>>.from(data));
     } catch (e) {
       _error = 'Failed to load businesses';
     }

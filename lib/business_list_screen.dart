@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mini_app/business_provider.dart';
+import 'package:mini_app/business_card.dart';
 
 class BusinessListScreen extends StatelessWidget {
   const BusinessListScreen({super.key});
@@ -27,10 +28,11 @@ class BusinessListScreen extends StatelessWidget {
             itemCount: provider.businesses.length,
             itemBuilder: (context, index) {
               final business = provider.businesses[index];
-              return ListTile(
-                title: Text(business.name),
-                subtitle: Text(business.location),
-                trailing: Text(business.contact),
+              return BusinessCard<Business>(
+                item: business,
+                title: business.name,
+                subtitle: business.location,
+                trailing: business.contact,
               );
             },
           );
